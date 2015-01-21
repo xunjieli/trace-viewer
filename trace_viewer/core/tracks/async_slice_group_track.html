@@ -85,10 +85,24 @@ tv.exportTo('tv.c.tracks', function() {
         return false;
       }
 
+      var addPlaceHolder = function(sliceToAdd) {
+        if (sliceToAdd.subSlices !== undefined &&
+            sliceToAdd.subSlices.length > 0) {
+          var children = sliceToAdd.subSlices;
+          for (var i = 0; i < children.length; i++) {
+            addPlaceHolder(children[i]);
+          }
+          return;
+        }
+        var placeHolder = {start: sliceToAdd.start, end: sliceToAdd.end};
+        sliceToAdd.subSlices = [placeHolder];
+      }
+
       var subRows = [];
       for (var i = 0; i < slices.length; i++) {
         var slice = slices[i];
         slice.isTopLevel = true;
+        addPlaceHolder(slice);
 
         var found = false;
         var index = subRows.length;
