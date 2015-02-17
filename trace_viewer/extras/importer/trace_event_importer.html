@@ -667,13 +667,6 @@ tv.exportTo('tv.e.importer', function() {
       if (this.allAsyncEvents_.length === 0)
         return;
 
-      this.allAsyncEvents_.sort(function(x, y) {
-        var d = x.event.ts - y.event.ts;
-        if (d !== 0)
-          return d;
-        return x.sequenceNumber - y.sequenceNumber;
-      });
-
       var legacyEvents = [];
       // Group nestable async events by ID. Events with the same ID should
       // belong to the same parent async event.
@@ -714,6 +707,15 @@ tv.exportTo('tv.e.importer', function() {
       // Parse nestable async events into AsyncSlices.
       for (var id in nestableAsyncEventsByID) {
         var eventStateEntries = nestableAsyncEventsByID[id];
+        eventStateEntries.sort(function(x, y) {
+          var d = x.event.ts - y.event.ts;
+          if (d !== 0)
+            return d;
+          if (x.event.ph === 'e' && x.event.ph === 'e')
+            return y.sequenceNumber - x.sequenceNumber;
+          return x.sequenceNumber - y.sequenceNumber;
+        });
+
         // Stack of enclosing BEGIN events.
         var parentStack = [];
         for (var i = 0; i < eventStateEntries.length; ++i) {
